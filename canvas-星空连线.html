@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Title</title>
+    <style>
+        *{margin:0;padding:0;}
+        body{width:100%;height:100%;background-color:#000;}
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    var Canvas={};
+    Canvas.animate={
+        //初始化canvas
+        init:function(){
+            var canvas=document.getElementById("canvas");
+            canvas.width=window.innerWidth;
+            canvas.height=window.innerHeight;
+            this.cw=canvas.width;
+            this.ch=canvas.height;
+            this.cxt=canvas.getContext("2d");
+            this.num=200;
+            this.data=[];
+            for(var i=0;i<this.num;i++){
+                this.data[i]={
+                    //小点随机位置
+                    x:Math.random()*this.cw,
+                    y:Math.random()*this.ch,
+                    //小点随机的运动增量
+                    cX:Math.random()*0.6-0.3,
+                    cY:Math.random()*0.6-0.3
+                };
+                //console.log(Math.random()*0.6-0.3)
+                this.drawCircle(this.data[i].x,this.data[i].y);
+            }
+        },
+        //绘制星星--圆
+        drawCircle:function(x,y){
+            var cxt=this.cxt;
+            cxt.save();
+            cxt.beginPath();
+            cxt.fillStyle="pink";
+            cxt.arc(x,y,.3,0,Math.PI*2,true);
+            cxt.closePath();
+            cxt.fill();
+            cxt.restore();
+        },
+        //让小点运动
+        moveCircle:function(){
+            this.cxt.clearRect(0,0,this.cw,this.ch);
+            for(var i=0;i<this.num;i++){ //上一个小点
+                //不让小点超出屏幕
+                if(this.data[i].x<0||this.data[i].x>this.cw){
+                    this.data[i].cX=-this.data[i].cX;
+                }
+                if(this.data[i].y<0||this.data[i].y>this.ch){
+                    this.data[i].cY=-this.data[i].cY
+                }
+                //实现连线
+                for(var j=i+1;j<this.num;j++){//下一个小点
+                    //利用勾股定理连线
+                    if(Math.pow(this.data[i].x-this.data[j].x,2)+
+                            Math.pow(this.data[i].y-this.data[j].y,2)<=50*50){
+                        this.drawLine(this.data[i].x,this.data[i].y,this.data[j].x,this.data[j].y);
+                    }
+                }
+                //利用随机增量 实现运动
+                this.data[i].x+=this.data[i].cX;
+                this.data[i].y+=this.data[i].cY;
+                this.drawCircle(this.data[i].x,this.data[i].y);
+            }
+        },
+        //画线
+        drawLine:function(x1,y1,x2,y2){
+            var cxt=this.cxt;
+            var lineargradient =cxt.createLinearGradient(x1,y1,x2,y2);
+            lineargradient.addColorStop(0,"#fff");
+            lineargradient.addColorStop(1,"#ccc");
+            cxt.save();
+            cxt.beginPath();
+            cxt.strokeStyle=lineargradient;
+            cxt.moveTo(x1,y1);
+            cxt.lineTo(x2,y2);
+            cxt.closePath();
+            cxt.stroke();
+            cxt.restore();
+        }
+    };
+    Canvas.animate.init();
+    setInterval(function(){ //运动起来
+        Canvas.animate.moveCircle()
+    },13);
+</script>
+</body>
+</html>
